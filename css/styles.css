@@ -1,6 +1,6 @@
 /* ===== CSS VARIABLES ===== */
 :root {
-    /* Light Theme Colors */
+    /* Colors */
     --primary-color: #3b82f6;
     --primary-hover: #2563eb;
     --secondary-color: #64748b;
@@ -26,7 +26,7 @@
     --cell-given: #f8fafc;
     --cell-user: #dbeafe;
     --cell-selected: #fef3c7;
-    --cell-highlighted: #fef7cd;
+    --cell-highlighted: #e0f2fe;  /* Changed to light blue */
     --cell-error: #fecaca;
     --cell-conflict: #fed7d7;
     
@@ -58,84 +58,6 @@
     --radius-xl: 0.75rem;
 }
 
-/* ===== DARK THEME ===== */
-@media (prefers-color-scheme: dark) {
-    :root {
-        /* Dark Theme Colors */
-        --primary-color: #60a5fa;
-        --primary-hover: #3b82f6;
-        --secondary-color: #94a3b8;
-        --success-color: #34d399;
-        --warning-color: #fbbf24;
-        --danger-color: #f87171;
-        --danger-hover: #ef4444;
-        
-        /* Dark Text Colors */
-        --text-primary: #f1f5f9;
-        --text-secondary: #94a3b8;
-        --text-light: #64748b;
-        
-        /* Dark Background Colors */
-        --bg-primary: #0f172a;
-        --bg-secondary: #1e293b;
-        --bg-tertiary: #334155;
-        
-        /* Dark Grid Colors */
-        --grid-border: #475569;
-        --grid-border-light: #334155;
-        --cell-empty: #1e293b;
-        --cell-given: #334155;
-        --cell-user: #1e40af;
-        --cell-selected: #92400e;
-        --cell-highlighted: #713f12;
-        --cell-error: #7f1d1d;
-        --cell-conflict: #991b1b;
-        
-        /* Dark Shadows */
-        --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
-        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.3);
-        --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.5), 0 4px 6px -4px rgb(0 0 0 / 0.4);
-    }
-}
-
-/* ===== MANUAL DARK THEME TOGGLE ===== */
-[data-theme="dark"] {
-    /* Dark Theme Colors */
-    --primary-color: #60a5fa;
-    --primary-hover: #3b82f6;
-    --secondary-color: #94a3b8;
-    --success-color: #34d399;
-    --warning-color: #fbbf24;
-    --danger-color: #f87171;
-    --danger-hover: #ef4444;
-    
-    /* Dark Text Colors */
-    --text-primary: #f1f5f9;
-    --text-secondary: #94a3b8;
-    --text-light: #64748b;
-    
-    /* Dark Background Colors */
-    --bg-primary: #0f172a;
-    --bg-secondary: #1e293b;
-    --bg-tertiary: #334155;
-    
-    /* Dark Grid Colors */
-    --grid-border: #475569;
-    --grid-border-light: #334155;
-    --cell-empty: #1e293b;
-    --cell-given: #334155;
-    --cell-user: #1e40af;
-    --cell-selected: #92400e;
-    --cell-highlighted: #713f12;
-    --cell-error: #7f1d1d;
-    --cell-conflict: #991b1b;
-    
-    /* Dark Shadows */
-    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.3);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.5), 0 4px 6px -4px rgb(0 0 0 / 0.4);
-}
-
 /* ===== RESET & BASE STYLES ===== */
 * {
     box-sizing: border-box;
@@ -165,32 +87,20 @@ body {
     padding: 0 var(--spacing-md);
 }
 
-.header {
-    background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
-    color: white;
-    padding: var(--spacing-lg) 0;
-    text-align: center;
-    box-shadow: var(--shadow-lg);
-}
-
-.logo {
+/* ===== GAME TITLE ===== */
+.game-title {
     font-size: var(--font-3xl);
     font-weight: 700;
-    margin: 0;
+    color: var(--primary-color);
+    text-align: center;
+    margin: var(--spacing-xl) 0;
     letter-spacing: -0.025em;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.tagline {
-    font-size: var(--font-lg);
-    margin: var(--spacing-xs) 0 0 0;
-    opacity: 0.9;
-    font-weight: 400;
+    text-shadow: 2px 2px 4px rgba(59, 130, 246, 0.1);
 }
 
 .main-content {
     flex: 1;
-    padding: var(--spacing-xl) 0;
+    padding: var(--spacing-lg) 0;
 }
 
 .footer {
@@ -206,6 +116,7 @@ body {
     color: var(--primary-color);
     text-decoration: none;
     margin: 0 var(--spacing-xs);
+    font-weight: 500;
 }
 
 .footer-link:hover {
@@ -292,16 +203,6 @@ body {
     border-color: var(--primary-color);
 }
 
-.btn-hint {
-    background-color: var(--warning-color);
-    color: white;
-}
-
-.btn-hint:hover:not(:disabled) {
-    background-color: #d97706;
-    transform: translateY(-1px);
-}
-
 .btn-success {
     background-color: var(--success-color);
     color: white;
@@ -334,62 +235,28 @@ body {
     gap: var(--spacing-sm);
 }
 
-.control-group label {
-    font-weight: 500;
-    color: var(--text-primary);
-    white-space: nowrap;
-}
-
-.difficulty-select {
-    padding: var(--spacing-sm) var(--spacing-md);
-    border: 1px solid var(--grid-border-light);
-    border-radius: var(--radius-md);
-    font-size: var(--font-sm);
-    background-color: var(--bg-primary);
-    color: var(--text-primary);
-    cursor: pointer;
-    min-width: 100px;
-}
-
-.difficulty-select:focus {
-    outline: 2px solid var(--primary-color);
-    outline-offset: 2px;
-}
-
-.pencil-icon {
-    font-size: var(--font-lg);
-}
-
-/* ===== GAME STATS ===== */
-.game-stats {
+/* ===== TIMER DISPLAY ===== */
+.timer-display {
     display: flex;
-    justify-content: center;
-    gap: var(--spacing-xl);
-    margin-bottom: var(--spacing-xl);
-    padding: var(--spacing-lg);
-    background-color: var(--bg-primary);
-    border-radius: var(--radius-xl);
-    box-shadow: var(--shadow-md);
-}
-
-.stat-item {
-    text-align: center;
-    min-width: 80px;
-}
-
-.stat-label {
-    display: block;
-    font-size: var(--font-sm);
-    color: var(--text-secondary);
-    margin-bottom: var(--spacing-xs);
+    align-items: center;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-sm) var(--spacing-md);
+    background-color: var(--bg-tertiary);
+    border-radius: var(--radius-md);
     font-weight: 500;
 }
 
-.stat-value {
-    display: block;
-    font-size: var(--font-xl);
-    font-weight: 600;
+.timer-label {
+    color: var(--text-secondary);
+    font-size: var(--font-sm);
+}
+
+.timer-value {
     color: var(--primary-color);
+    font-size: var(--font-lg);
+    font-weight: 600;
+    min-width: 3rem;
+    text-align: center;
 }
 
 /* ===== SUDOKU GRID ===== */
@@ -711,18 +578,9 @@ body {
     }
 }
 
-@keyframes pulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-}
-
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
-}
-
-.pulse {
-    animation: pulse 1s infinite;
 }
 
 /* Processing Spinner */
@@ -739,8 +597,8 @@ body {
 /* ===== RESPONSIVE DESIGN ===== */
 @media (max-width: 768px) {
     :root {
-        --font-3xl: 1.5rem;
-        --font-2xl: 1.25rem;
+        --font-3xl: 2rem;
+        --font-2xl: 1.5rem;
         --font-xl: 1.125rem;
     }
 
@@ -758,20 +616,9 @@ body {
         justify-content: center;
     }
 
-    .game-stats {
-        flex-direction: column;
-        gap: var(--spacing-md);
-    }
-
-    .stat-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        min-width: auto;
-    }
-
-    .stat-label {
-        margin-bottom: 0;
+    .timer-display {
+        width: 100%;
+        justify-content: center;
     }
 
     .sudoku-grid {
@@ -830,43 +677,6 @@ body {
     .control-group {
         width: 100%;
         justify-content: center;
-    }
-}
-
-/* ===== ACCESSIBILITY ===== */
-@media (prefers-reduced-motion: reduce) {
-    * {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-    }
-}
-
-@media (prefers-color-scheme: dark) {
-    /* Note: Dark mode styles can be added here if desired */
-}
-
-/* ===== PRINT STYLES ===== */
-@media print {
-    .game-controls,
-    .number-pad,
-    .modal,
-    .footer {
-        display: none !important;
-    }
-    
-    .main-content {
-        padding: 0;
-    }
-    
-    .sudoku-grid {
-        box-shadow: none;
-        border: 2px solid #000;
-    }
-    
-    .sudoku-cell {
-        border: 1px solid #ccc;
-        font-size: 14px;
     }
 }
 

@@ -14,17 +14,12 @@
     </style>
 </head>
 <body>
-    <!-- Header -->
-    <header class="header">
-        <div class="container">
-            <h1 class="logo">SUDOKOO</h1>
-            <p class="tagline">Challenge Your Mind - Easy Mode</p>
-        </div>
-    </header>
-
     <!-- Main Game Area -->
     <main class="main-content">
         <div class="container">
+            <!-- Game Title -->
+            <h1 class="game-title">SUDOKOO</h1>
+
             <!-- Game Controls -->
             <section class="game-controls">
                 <div class="control-group">
@@ -45,25 +40,10 @@
                         <span class="pencil-icon">✏️</span>
                         Pencil Mode
                     </button>
-                    <button id="theme-btn" class="btn btn-secondary">
-                        🌙 Dark Theme
-                    </button>
-                </div>
-            </section>
-
-            <!-- Game Stats -->
-            <section class="game-stats">
-                <div class="stat-item">
-                    <span class="stat-label">Time:</span>
-                    <span id="timer" class="stat-value">00:00</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Progress:</span>
-                    <span id="progress-counter" class="stat-value">0/81</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Source:</span>
-                    <span id="puzzle-source" class="stat-value">Generated</span>
+                    <div class="timer-display">
+                        <span class="timer-label">Time:</span>
+                        <span id="timer" class="timer-value">--:--</span>
+                    </div>
                 </div>
             </section>
 
@@ -142,9 +122,7 @@
         <div class="container">
             <p>&copy; 2025 SUDOKOO. Built with AWS by Tim for Solutions Architect Portfolio.</p>
             <p>
-                <a href="#" class="footer-link">About</a> |
-                <a href="#" class="footer-link">Rules</a> |
-                <a href="#" class="footer-link">GitHub</a>
+                <a href="https://github.com/timtimtim87/SUDOKOO" class="footer-link" target="_blank" rel="noopener">GitHub</a>
             </p>
         </div>
     </footer>

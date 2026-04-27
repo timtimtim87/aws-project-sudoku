@@ -13,17 +13,16 @@ class SudokooApp {
             startTime: null,
             timer: null,
             isPaused: false,
+            gameStarted: false, // Track if user has started playing
             difficulty: 'easy'
         };
         this.ui = {
             grid: null,
             cells: [],
             timer: null,
-            progressCounter: null,
             statusMessage: null,
             pencilBtn: null,
-            numberBtns: [],
-            puzzleSource: null
+            numberBtns: []
         };
         
         this.init();
@@ -35,7 +34,6 @@ class SudokooApp {
     init() {
         this.setupUI();
         this.attachEventListeners();
-        this.initTheme();
         this.startNewGame();
     }
 
@@ -46,10 +44,8 @@ class SudokooApp {
         // Get DOM elements
         this.ui.grid = document.getElementById('sudoku-grid');
         this.ui.timer = document.getElementById('timer');
-        this.ui.progressCounter = document.getElementById('progress-counter');
         this.ui.statusMessage = document.getElementById('status-message');
         this.ui.pencilBtn = document.getElementById('pencil-btn');
-        this.ui.puzzleSource = document.getElementById('puzzle-source');
 
         // Create grid cells
         this.createGrid();
@@ -134,37 +130,26 @@ class SudokooApp {
             this.clearProgress();
         });
 
-        // Camera button (handled in setupCameraFeature)
-
         // Pencil mode toggle
         this.ui.pencilBtn.addEventListener('click', () => {
             this.togglePencilMode();
         });
 
-        // Theme toggle
-        document.getElementById('theme-btn').addEventListener('click', () => {
-            this.toggleTheme();
-        });
+        // Modal buttons - using the correct IDs from your HTML
+        const playAgainBtn = document.getElementById('play-again-btn');
+        if (playAgainBtn) {
+            playAgainBtn.addEventListener('click', () => {
+                this.hideModal('win-modal');
+                this.startNewGame();
+            });
+        }
 
-        // Modal buttons
-        document.getElementById('play-again-btn').addEventListener('click', () => {
-            this.hideModal('win-modal');
-            this.startNewGame();
-        });
-
-        document.getElementById('close-modal-btn').addEventListener('click', () => {
-            this.hideModal('win-modal');
-        });
-
-        document.getElementById('try-again-btn').addEventListener('click', () => {
-            this.hideModal('game-over-modal');
-            this.clearProgress();
-        });
-
-        document.getElementById('new-puzzle-btn').addEventListener('click', () => {
-            this.hideModal('game-over-modal');
-            this.startNewGame();
-        });
+        const closeModalBtn = document.getElementById('close-modal-btn');
+        if (closeModalBtn) {
+            closeModalBtn.addEventListener('click', () => {
+                this.hideModal('win-modal');
+            });
+        }
     }
 
     /**
@@ -256,16 +241,21 @@ class SudokooApp {
         this.showModal('processing-modal');
         this.showStatus('Analyzing image with AI...', 'info');
         
-        const formData = new FormData();
-        formData.append('image', imageFile);
-        
         try {
-            // TODO: Replace with your actual API Gateway endpoint
-            const apiEndpoint = 'https://qn7stfg9ag.execute-api.us-east-1.amazonaws.com/prod/scan-sudoku';
+            // Convert file to base64
+            const base64Data = await this.fileToBase64(imageFile);
+            
+            // API endpoint - using your actual API Gateway URL
+            const apiEndpoint = 'https://<api-id>.execute-api.us-east-1.amazonaws.com/prod/scan-sudoku';
             
             const response = await fetch(apiEndpoint, {
                 method: 'POST',
-                body: formData
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    image: base64Data
+                })
             });
             
             if (!response.ok) {
@@ -279,40 +269,42 @@ class SudokooApp {
             if (result.success && result.puzzle && result.solution) {
                 // Load the detected puzzle into game engine
                 this.engine.init(result.puzzle, result.solution);
-                this.gameState.startTime = Date.now();
+                
+                // Reset game state for new scanned puzzle
                 this.gameState.selectedCell = null;
+                this.gameState.gameStarted = false;
+                this.gameState.startTime = null;
+                this.stopTimer();
                 
                 // Update UI
                 this.updateGrid();
-                this.updateStats();
-                this.startTimer();
-                
-                // Update source indicator
-                if (this.ui.puzzleSource) {
-                    this.ui.puzzleSource.textContent = 'Scanned';
-                }
-                
                 this.showStatus('Puzzle successfully loaded from image! 📸', 'success');
                 
-                console.log('Scanned puzzle loaded:', result.metadata);
+                console.log('Scanned puzzle loaded:', result.debug);
             } else {
-                this.showStatus(result.error || 'Could not detect puzzle. Please try a clearer image.', 'error');
+                this.showStatus(result.message || 'Could not detect puzzle. Please try a clearer image.', 'error');
             }
             
         } catch (error) {
             this.hideModal('processing-modal');
             console.error('Image processing error:', error);
-            
-            // Fallback error handling
-            if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-                this.showStatus('Camera feature not yet available. Please use "New Puzzle" for now.', 'warning');
-            } else {
-                this.showStatus('Image processing failed. Please try again with a clearer photo.', 'error');
-            }
+            this.showStatus('Image processing failed. Please try again with a clearer photo.', 'error');
         }
         
         // Clear the file input for next use
         document.getElementById('camera-input').value = '';
+    }
+
+    /**
+     * Convert file to base64
+     */
+    fileToBase64(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = error => reject(error);
+        });
     }
 
     /**
@@ -321,8 +313,10 @@ class SudokooApp {
     startNewGame() {
         // Reset game state
         this.gameState.selectedCell = null;
-        this.gameState.startTime = Date.now();
+        this.gameState.gameStarted = false;
+        this.gameState.startTime = null;
         this.gameState.isPaused = false;
+        this.stopTimer();
 
         // Get new easy puzzle
         const puzzle = this.puzzleManager.getRandomPuzzle('easy');
@@ -330,17 +324,21 @@ class SudokooApp {
 
         // Update UI
         this.updateGrid();
-        this.updateStats();
-        this.startTimer();
+        this.resetTimer();
         
-        // Update source indicator
-        if (this.ui.puzzleSource) {
-            this.ui.puzzleSource.textContent = 'Generated';
-        }
-        
-        this.showStatus(`New easy puzzle loaded!`, 'info');
-
+        this.showStatus(`New puzzle loaded! Start playing to begin the timer.`, 'info');
         console.log('New game started:', puzzle.name);
+    }
+
+    /**
+     * Start the timer when user makes their first move
+     */
+    startGameTimer() {
+        if (!this.gameState.gameStarted) {
+            this.gameState.gameStarted = true;
+            this.gameState.startTime = Date.now();
+            this.startTimer();
+        }
     }
 
     /**
@@ -435,6 +433,9 @@ class SudokooApp {
             return;
         }
 
+        // Start timer on first move
+        this.startGameTimer();
+
         if (this.gameState.pencilMode) {
             // Toggle pencil mark
             const added = this.engine.togglePencilMark(row, col, num);
@@ -448,7 +449,6 @@ class SudokooApp {
                 // Check if it's the correct answer
                 if (this.engine.isCorrectMove(row, col, num)) {
                     this.updateCell(row, col);
-                    this.updateStats();
                     this.highlightRelatedCells(row, col);
                     
                     // Check if puzzle is solved
@@ -460,7 +460,6 @@ class SudokooApp {
                 } else {
                     // Incorrect move - just show error, no game over
                     this.updateCell(row, col);
-                    this.updateStats();
                     this.highlightRelatedCells(row, col);
                     
                     // Show error animation
@@ -490,6 +489,9 @@ class SudokooApp {
             return;
         }
 
+        // Start timer on first move (even erasing counts as a move)
+        this.startGameTimer();
+
         if (this.gameState.pencilMode) {
             // Clear all pencil marks
             this.engine.clearPencilMarksForCell(row, col);
@@ -499,7 +501,6 @@ class SudokooApp {
             // Clear the cell
             this.engine.placeNumber(row, col, 0);
             this.updateCell(row, col);
-            this.updateStats();
             this.highlightRelatedCells(row, col);
         }
     }
@@ -518,33 +519,6 @@ class SudokooApp {
             this.ui.pencilBtn.classList.remove('active');
             this.showStatus('Pencil mode disabled', 'info');
         }
-    }
-
-    /**
-     * Show a hint
-     */
-    showHint() {
-        const hint = this.engine.getHint();
-        
-        if (!hint) {
-            this.showStatus('No hints available - puzzle is complete!', 'success');
-            return;
-        }
-
-        // Select the hint cell
-        this.selectCell(hint.row, hint.col);
-        
-        // Flash the cell to draw attention
-        const cell = this.ui.cells[hint.row][hint.col];
-        cell.classList.add('pulse');
-        setTimeout(() => {
-            cell.classList.remove('pulse');
-        }, 2000);
-
-        // Show hint message
-        this.showStatus(`Hint: Try ${hint.value} in the highlighted cell`, 'info');
-
-        console.log('Hint provided:', hint);
     }
 
     /**
@@ -572,12 +546,15 @@ class SudokooApp {
     clearProgress() {
         if (confirm('Are you sure you want to clear your progress?')) {
             this.engine.reset();
-            this.gameState.startTime = Date.now();
+            
+            // Reset timer state
+            this.gameState.gameStarted = false;
+            this.gameState.startTime = null;
+            this.stopTimer();
+            this.resetTimer();
             
             this.updateGrid();
-            this.updateStats();
-            this.startTimer();
-            this.showStatus('Progress cleared!', 'info');
+            this.showStatus('Progress cleared! Start playing to begin the timer.', 'info');
         }
     }
 
@@ -645,17 +622,6 @@ class SudokooApp {
     }
 
     /**
-     * Update game statistics display
-     */
-    updateStats() {
-        // Update timer is handled by the timer function
-        
-        // Update progress
-        const progress = this.engine.getProgress();
-        this.ui.progressCounter.textContent = `${progress.filled}/${progress.total}`;
-    }
-
-    /**
      * Update number button states
      */
     updateNumberButtons() {
@@ -678,13 +644,22 @@ class SudokooApp {
     }
 
     /**
+     * Reset timer display
+     */
+    resetTimer() {
+        if (this.ui.timer) {
+            this.ui.timer.textContent = '--:--';
+        }
+    }
+
+    /**
      * Start the game timer
      */
     startTimer() {
         this.stopTimer(); // Clear any existing timer
         
         this.gameState.timer = setInterval(() => {
-            if (!this.gameState.isPaused) {
+            if (!this.gameState.isPaused && this.gameState.startTime) {
                 const elapsed = Date.now() - this.gameState.startTime;
                 const minutes = Math.floor(elapsed / 60000);
                 const seconds = Math.floor((elapsed % 60000) / 1000);
@@ -708,15 +683,17 @@ class SudokooApp {
      * Show status message
      */
     showStatus(message, type = 'info') {
-        this.ui.statusMessage.textContent = message;
-        this.ui.statusMessage.className = `status-message ${type}`;
-        
-        // Auto-hide after 3 seconds for non-error messages
-        if (type !== 'error') {
-            setTimeout(() => {
-                this.ui.statusMessage.textContent = '';
-                this.ui.statusMessage.className = 'status-message';
-            }, 3000);
+        if (this.ui.statusMessage) {
+            this.ui.statusMessage.textContent = message;
+            this.ui.statusMessage.className = `status-message ${type}`;
+            
+            // Auto-hide after 3 seconds for non-error messages
+            if (type !== 'error') {
+                setTimeout(() => {
+                    this.ui.statusMessage.textContent = '';
+                    this.ui.statusMessage.className = 'status-message';
+                }, 3000);
+            }
         }
     }
 
@@ -726,18 +703,25 @@ class SudokooApp {
     onGameWin() {
         this.stopTimer();
         
-        const elapsed = Date.now() - this.gameState.startTime;
-        const minutes = Math.floor(elapsed / 60000);
-        const seconds = Math.floor((elapsed % 60000) / 1000);
-        const timeString = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        // Calculate final time
+        let timeString = '--:--';
+        if (this.gameState.startTime) {
+            const elapsed = Date.now() - this.gameState.startTime;
+            const minutes = Math.floor(elapsed / 60000);
+            const seconds = Math.floor((elapsed % 60000) / 1000);
+            timeString = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
         
         // Update win modal
-        document.getElementById('final-time').textContent = timeString;
+        const finalTimeElement = document.getElementById('final-time');
+        if (finalTimeElement) {
+            finalTimeElement.textContent = timeString;
+        }
         
         // Update source in win modal
         const finalSource = document.getElementById('final-source');
-        if (finalSource && this.ui.puzzleSource) {
-            finalSource.textContent = this.ui.puzzleSource.textContent;
+        if (finalSource) {
+            finalSource.textContent = 'Easy Puzzle';
         }
         
         // Show win modal
@@ -747,8 +731,7 @@ class SudokooApp {
         
         console.log('Game won!', {
             time: timeString,
-            difficulty: 'easy',
-            source: this.ui.puzzleSource?.textContent || 'Unknown'
+            difficulty: 'easy'
         });
     }
 
@@ -769,55 +752,6 @@ class SudokooApp {
         const modal = document.getElementById(modalId);
         if (modal) {
             modal.classList.add('hidden');
-        }
-    }
-
-    /**
-     * Toggle between light and dark theme
-     */
-    toggleTheme() {
-        const body = document.body;
-        const themeBtn = document.getElementById('theme-btn');
-        const currentTheme = body.getAttribute('data-theme');
-        
-        if (currentTheme === 'dark') {
-            body.removeAttribute('data-theme');
-            themeBtn.textContent = '🌙 Dark Theme';
-            localStorage.setItem('sudokoo-theme', 'light');
-            this.showStatus('Switched to light theme', 'info');
-        } else {
-            body.setAttribute('data-theme', 'dark');
-            themeBtn.textContent = '☀️ Light Theme';
-            localStorage.setItem('sudokoo-theme', 'dark');
-            this.showStatus('Switched to dark theme', 'info');
-        }
-    }
-
-    /**
-     * Initialize theme from localStorage
-     */
-    initTheme() {
-        const savedTheme = localStorage.getItem('sudokoo-theme');
-        const themeBtn = document.getElementById('theme-btn');
-        
-        if (savedTheme === 'dark') {
-            document.body.setAttribute('data-theme', 'dark');
-            themeBtn.textContent = '☀️ Light Theme';
-        } else {
-            themeBtn.textContent = '🌙 Dark Theme';
-        }
-    }
-
-    /**
-     * Pause/Resume game
-     */
-    togglePause() {
-        this.gameState.isPaused = !this.gameState.isPaused;
-        
-        if (this.gameState.isPaused) {
-            this.showStatus('Game paused', 'info');
-        } else {
-            this.showStatus('Game resumed', 'info');
         }
     }
 
@@ -848,7 +782,6 @@ document.addEventListener('DOMContentLoaded', () => {
     window.sudokooDebug = {
         getInfo: () => window.sudokooApp.getDebugInfo(),
         solve: () => window.sudokooApp.showSolution(),
-        hint: () => window.sudokooApp.showHint(),
         newGame: () => window.sudokooApp.startNewGame(),
         togglePencil: () => window.sudokooApp.togglePencilMode()
     };
