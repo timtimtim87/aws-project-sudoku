@@ -18,7 +18,7 @@ Game engine (client-side validation + backtracking solver)
 
 ## Tech stack
 
-- Vanilla JavaScript, HTML, CSS — no frameworks
+- Vanilla JavaScript, HTML, CSS
 - AWS Lambda (Node.js 18)
 - Amazon Bedrock — Claude 3.5 Sonnet (vision)
 - API Gateway
