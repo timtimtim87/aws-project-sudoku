@@ -15,8 +15,7 @@ class PuzzleManager {
      * Get a random easy puzzle
      */
     getRandomPuzzle(difficulty = 'easy') {
-        // Always use generator for fresh puzzles
-        return this.getGeneratedPuzzle('easy');
+        return this.getGeneratedPuzzle(difficulty);
     }
 
     /**
@@ -24,7 +23,7 @@ class PuzzleManager {
      */
     getGeneratedPuzzle(difficulty = 'easy') {
         try {
-            const puzzle = this.generator.generateFreshPuzzle('easy');
+            const puzzle = this.generator.generateFreshPuzzle(difficulty);
             
             this.currentPuzzle = {
                 ...puzzle,

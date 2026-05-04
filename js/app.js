@@ -1,3 +1,5 @@
+const SCAN_API_ENDPOINT = 'https://your-api-id.execute-api.us-east-1.amazonaws.com/prod/scan-sudoku';
+
 class SudokooApp {
     constructor() {
         this.engine = new SudokuEngine();
@@ -158,9 +160,7 @@ class SudokooApp {
         try {
             const base64Data = await this.fileToBase64(imageFile);
 
-            const apiEndpoint = 'https://<api-id>.execute-api.us-east-1.amazonaws.com/prod/scan-sudoku';
-
-            const response = await fetch(apiEndpoint, {
+            const response = await fetch(SCAN_API_ENDPOINT, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ image: base64Data })

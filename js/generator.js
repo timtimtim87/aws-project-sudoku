@@ -5,11 +5,11 @@
 
 class SudokuGenerator {
     constructor() {
-        this.difficulty_settings = {
-            'easy': { clues: 45-50, name: 'Easy' },
-            'medium': { clues: 35-40, name: 'Medium' },  
-            'hard': { clues: 25-30, name: 'Hard' },
-            'expert': { clues: 17-22, name: 'Expert' }
+        this.difficultySettings = {
+            'easy':   { min: 45, max: 50, name: 'Easy' },
+            'medium': { min: 35, max: 40, name: 'Medium' },
+            'hard':   { min: 25, max: 30, name: 'Hard' },
+            'expert': { min: 17, max: 22, name: 'Expert' }
         };
     }
 
@@ -86,7 +86,7 @@ class SudokuGenerator {
      */
     createPuzzle(solution, difficulty = 'medium') {
         const puzzle = solution.map(row => [...row]);
-        const settings = this.difficulty_settings[difficulty];
+        const settings = this.difficultySettings[difficulty];
         
         if (!settings) {
             console.warn(`Unknown difficulty: ${difficulty}, using medium`);
@@ -174,7 +174,7 @@ class SudokuGenerator {
         
         return {
             id: `generated_${difficulty}_${Date.now()}`,
-            name: `Fresh ${this.difficulty_settings[difficulty]?.name || 'Medium'} Puzzle`,
+            name: `Fresh ${this.difficultySettings[difficulty]?.name || 'Medium'} Puzzle`,
             puzzle: puzzle,
             solution: solution,
             difficulty: difficulty,
