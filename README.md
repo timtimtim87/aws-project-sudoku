@@ -2,6 +2,8 @@
 
 Interactive Sudoku game with a camera scanning feature powered by AWS Bedrock.
 
+For a written article about this project, visit [timtimtim87.github.io](https://timtimtim87.github.io).
+
 ## What it does
 
 Play Sudoku in the browser. The camera scan feature lets you photograph a printed puzzle — from a newspaper or book — and load it digitally. AWS Bedrock (Claude 3.5 Sonnet) reads the image and returns a structured 9x9 grid ready to play.
